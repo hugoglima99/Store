@@ -25,10 +25,9 @@ namespace Store.Web
         private static void RunSeeding(IWebHost host)
         {
             var scopeFactory = host.Services.GetService<IServiceScopeFactory>();
-            using(var scope = scopeFactory.CreateScope())
+            using (var scope = scopeFactory.CreateScope())
             {
-                var seeder = scope.ServiceProvider.GetService<SeedDb>();
-                seeder.SeedAsync().Wait();
+                
             }
         }
 

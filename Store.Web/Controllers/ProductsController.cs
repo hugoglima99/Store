@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Store.Web.Data;
 using Store.Web.Data.Entities;
+using Store.Web.Helpers;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -10,10 +11,12 @@ namespace Store.Web.Controllers
     public class ProductsController : Controller
     {
         private readonly IProductRepository productRepository;
+        private readonly IUserHelper userHelper;
 
-        public ProductsController(IProductRepository productRepository)
+        public ProductsController(IProductRepository productRepository, IUserHelper userHelper)
         {
             this.productRepository = productRepository;
+            this.userHelper = userHelper;
         }
 
         // GET: Products
@@ -54,6 +57,10 @@ namespace Store.Web.Controllers
         {
             if (ModelState.IsValid)
             {
+
+                //1000: Change for the logged user
+                product.User = await this.userHelper.GetUserByEmailAsync("hugoglima1999@gmail.com");
+
                 await this.productRepository.CreateAsync(product);
                 
                 return RedirectToAction(nameof(Index));
@@ -90,6 +97,10 @@ namespace Store.Web.Controllers
             {
                 try
                 {
+
+                    //1000: Change for the logged user
+                    product.User = await this.userHelper.GetUserByEmailAsync("hugoglima1999@gmail.com");
+
                     await this.productRepository.UpdateAsync(product);
                     
                 }
