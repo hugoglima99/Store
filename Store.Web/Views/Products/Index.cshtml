@@ -46,7 +46,10 @@
                 @Html.DisplayFor(modelItem => item.Price)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.ImagUrl)
+                @if (!string.IsNullOrEmpty(item.ImagUrl))
+                {
+                    <img src="@Url.Content(item.ImagUrl)" alt="image" style="width:100px; height:150px;max-width:100%; height=auto"/>
+                 }
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.LastPurchase)
