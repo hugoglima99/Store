@@ -1,18 +1,17 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Store.Web.Data.Entities;
-using Store.Web.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Store.Web.Data
+﻿namespace Store.Web.Data
 {
+    using System;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Identity;
+    using Entities;
+    using Store.Web.Helpers;
+
     public class SeedDb
     {
         private readonly DataContext context;
         private readonly IUserHelper userHelper;
-        private Random random;
+        private readonly Random random;
 
         public SeedDb(DataContext context, IUserHelper userHelper)
         {
@@ -20,13 +19,17 @@ namespace Store.Web.Data
             this.userHelper = userHelper;
             this.random = new Random();
         }
-
         public async Task SeedAsync()
         {
             await this.context.Database.EnsureCreatedAsync();
 
+            await this.userHelper.CheckRoleAsync("Admin");
+            await this.userHelper.CheckRoleAsync("Customer");
+
+
+
             var user = await this.userHelper.GetUserByEmailAsync("hugoglima1999@gmail.com");
-            if(user == null)
+            if (user == null)
             {
                 user = new User
                 {
@@ -34,15 +37,27 @@ namespace Store.Web.Data
                     LastName = "Lima",
                     Email = "hugoglima1999@gmail.com",
                     UserName = "hugoglima1999@gmail.com",
-                    PhoneNumber = "912345678"
+                    PhoneNumber = "123456789"
                 };
 
-                var result = await this.userHelper.AddUserAsync (user, "123456");
-                if(result != IdentityResult.Success)
+                var result = await this.userHelper.AddUserAsync(user, "123456");
+
+                if (result != IdentityResult.Success)
                 {
                     throw new InvalidOperationException("Could not create the user in seeder");
                 }
+
+                await this.userHelper.AddToRoleAsync(user, "Admin");
+
             }
+
+            var isRole = await this.userHelper.IsUserInRoleAsync(user, "Admin");
+
+            if (!isRole)
+            {
+                await this.userHelper.AddToRoleAsync(user, "Admin");
+            }
+
 
             if (!this.context.Products.Any())
             {
@@ -62,7 +77,8 @@ namespace Store.Web.Data
                 IsAvailable = true,
                 Stock = this.random.Next(100),
                 User = user
-            }) ;
+
+            });
         }
     }
 }

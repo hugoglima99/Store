@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Store.Web.Controllers
 {
-    public class AccountController: Controller
+    public class AccountController : Controller
     {
         private readonly IUserHelper userHelper;
 
@@ -19,13 +19,14 @@ namespace Store.Web.Controllers
             this.userHelper = userHelper;
         }
 
+        public Task SignInManager { get; private set; }
+
         public IActionResult Login()
         {
             if (this.User.Identity.IsAuthenticated)
             {
                 return this.RedirectToAction("Index", "Home");
             }
-
             return this.View();
         }
 
@@ -37,19 +38,16 @@ namespace Store.Web.Controllers
                 var result = await this.userHelper.LoginAsync(model);
                 if (result.Succeeded)
                 {
-                    if (this.Request.Query.Keys.Contains("ReturnUrl"))
+                    if (this.Request.Query.Keys.Contains("ReturnURL"))
                     {
                         return this.Redirect(this.Request.Query["ReturnUrl"].First());
                     }
-
                     return this.RedirectToAction("Index", "Home");
                 }
             }
-
-            this.ModelState.AddModelError(string.Empty, "Fail to Login");
+            this.ModelState.AddModelError(string.Empty, "Failed to login");
             return this.View(model);
         }
-
 
         public async Task<IActionResult> Logout()
         {
@@ -68,7 +66,7 @@ namespace Store.Web.Controllers
             if (this.ModelState.IsValid)
             {
                 var user = await this.userHelper.GetUserByEmailAsync(model.UserName);
-                if(user == null)
+                if (user == null)
                 {
                     user = new User
                     {
@@ -79,9 +77,9 @@ namespace Store.Web.Controllers
                     };
 
                     var result = await this.userHelper.AddUserAsync(user, model.Password);
-                    if(result != IdentityResult.Success)
+                    if (result != IdentityResult.Success)
                     {
-                        this.ModelState.TryAddModelError(string.Empty, "The user couldn't be created.");
+                        this.ModelState.AddModelError(string.Empty, "The user could´t be created");
                         return this.View(model);
                     }
 
@@ -99,12 +97,12 @@ namespace Store.Web.Controllers
                         return this.RedirectToAction("Index", "Home");
                     }
 
-                    this.ModelState.AddModelError(string.Empty, "The user couldn't be login.");
+                    this.ModelState.AddModelError(string.Empty, "The user Coudn´t be login");
                     return this.View(model);
                 }
-
                 this.ModelState.AddModelError(string.Empty, "The username is already registered.");
             }
+
             return this.View(model);
         }
         public async Task<IActionResult> ChangeUser()
@@ -117,7 +115,6 @@ namespace Store.Web.Controllers
                 model.FirstName = user.FirstName;
                 model.LastName = user.LastName;
             }
-
             return this.View(model);
         }
 
@@ -127,15 +124,14 @@ namespace Store.Web.Controllers
             if (this.ModelState.IsValid)
             {
                 var user = await this.userHelper.GetUserByEmailAsync(this.User.Identity.Name);
-                if(user != null)
+                if (user != null)
                 {
                     user.FirstName = model.FirstName;
                     user.LastName = model.LastName;
                     var response = await this.userHelper.UpdateUserAsync(user);
                     if (response.Succeeded)
                     {
-                        this.ViewBag.UserMessage = " User update";
-
+                        this.ViewBag.UserMessage = "User Update";
                     }
                     else
                     {
@@ -149,9 +145,11 @@ namespace Store.Web.Controllers
             }
 
             return this.View(model);
+
         }
 
-        public IActionResult ChangePassword()
+
+        public IActionResult ChangePasswod()
         {
             return this.View();
         }
@@ -176,17 +174,13 @@ namespace Store.Web.Controllers
                 }
                 else
                 {
-
-                    this.ModelState.AddModelError(string.Empty, "User not found");
+                    this.ModelState.AddModelError(string.Empty, "User not Found");
                 }
             }
-
             return this.View(model);
         }
 
+
     }
-
-   
-
-    
 }
+

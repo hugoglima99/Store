@@ -1,18 +1,16 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Store.Web.Data;
-using Store.Web.Data.Entities;
-using Store.Web.Helpers;
-using Store.Web.Models;
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Store.Web.Controllers
+﻿namespace Store.Web.Controllers
 {
-    
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+    using Store.Web.Data;
+    using Store.Web.Data.Entities;
+    using Store.Web.Helpers;
+    using Store.Web.Models;
+    using System;
+    using System.IO;
+    using System.Threading.Tasks;
+
     public class ProductsController : Controller
     {
         private readonly IProductRepository productRepository;
@@ -48,9 +46,9 @@ namespace Store.Web.Controllers
         }
 
 
-       
+
         // GET: Products/Create
-        [Authorize]
+        [Authorize(Roles ="Admin")]
         public IActionResult Create()
         {
             return View();
@@ -67,7 +65,7 @@ namespace Store.Web.Controllers
             {
                 var path = string.Empty;
 
-                if(view.ImageFile != null && view.ImageFile.Length > 0)
+                if (view.ImageFile != null && view.ImageFile.Length > 0)
                 {
                     var guid = Guid.NewGuid().ToString();
                     var file = $"{guid}.jpg";
@@ -78,23 +76,23 @@ namespace Store.Web.Controllers
                         "wwwroot\\images\\Products",
                         file);
 
-                    using(var stream = new FileStream(path, FileMode.Create))
+                    using (var stream = new FileStream(path, FileMode.Create))
                     {
                         await view.ImageFile.CopyToAsync(stream);
                     }
 
-                    path = $"~/images/Products/{file}"; 
+                    path = $"~/images/Products/{file}";
 
                 }
 
 
                 var product = this.ToProduct(view, path);
 
-                
+
                 product.User = await this.userHelper.GetUserByEmailAsync(this.User.Identity.Name);
 
                 await this.productRepository.CreateAsync(product);
-                
+
                 return RedirectToAction(nameof(Index));
             }
             return View(view);
@@ -117,7 +115,7 @@ namespace Store.Web.Controllers
         }
 
         // GET: Products/Edit/5
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> Edit(int? id)
         {
             if (id == null)
@@ -149,8 +147,8 @@ namespace Store.Web.Controllers
                 Price = product.Price,
                 Stock = product.Stock,
                 User = product.User
-                
-            }; 
+
+            };
         }
 
         // POST: Products/Edit/5
@@ -158,7 +156,7 @@ namespace Store.Web.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Price,ImageFile,LastPurchase,LastSale,IsAvailable,Stock")] ProductViewModel view)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Price,ImageFile,ImageUrl,LastPurchase,LastSale,IsAvailable,Stock")] ProductViewModel view)
         {
 
 
@@ -198,11 +196,11 @@ namespace Store.Web.Controllers
 
                     var product = this.ToProduct(view, path);
 
-                    
+
                     product.User = await this.userHelper.GetUserByEmailAsync(this.User.Identity.Name);
 
                     await this.productRepository.UpdateAsync(product);
-                    
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -221,7 +219,7 @@ namespace Store.Web.Controllers
         }
 
         // GET: Products/Delete/5
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
